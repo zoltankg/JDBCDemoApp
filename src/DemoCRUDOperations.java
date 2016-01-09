@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.Scanner;
 
 
 /**
@@ -19,15 +20,38 @@ public class DemoCRUDOperations {
         System.out.println("Hello database users! We are going to call DB from Java");
         try {
             //demo CRUD operations
-            demoCreate();
-            demoRead();
-            demoUpdate();
-            demoDelete();
+            //demoCreate();
+            //demoRead();
+            //demoUpdate();
+            //demoRead();
+            //demoDelete();
+            boolean gasit=false;
+            gasit=login("ionel@gmail.com", "Ionel123");
+            if(gasit)
+                System.out.println("bravooo");
+            else
+                System.out.println("gresit!!!");
 
            // demoBlobInsert();
            // demoBlobRead();
 
+            do {
+                Scanner sc = new Scanner(System.in);
+                System.out.println("email");
+                String email = sc.nextLine();
+                System.out.println("password");
+                String passw = sc.nextLine();
+                if (login(email, passw)){
+                    System.out.println("exista");
+                    break;
+                }
+                else {
+                    System.out.println("mai incearca!");
+                }
 
+
+            }
+            while(true);
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -37,13 +61,12 @@ public class DemoCRUDOperations {
 
     }
 
-    private static void demoCreate() throws ClassNotFoundException, SQLException {
-
+    private static boolean login(String email, String password)throws ClassNotFoundException, SQLException {
         // 1. load driver
         Class.forName("org.postgresql.Driver");
 
         // 2. define connection params to db
-        final String URL = "jdbc:postgresql://IP:5432/fast1";
+        final String URL = "jdbc:postgresql://54.93.65.5:5432/Agenda_Zoltan";
         final String USERNAME = "fasttrackit_dev";
         final String PASSWORD = "fasttrackit_dev";
 
@@ -51,9 +74,51 @@ public class DemoCRUDOperations {
         Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
 
         // 4. create a query statement
-        PreparedStatement pSt = conn.prepareStatement("INSERT INTO USERS (NAME, PASSWORD) VALUES (?,?)");
-        pSt.setString(1, "ionel");
-        pSt.setString(2, "password1");
+        Statement st = conn.createStatement();
+
+        // 5. execute a query
+        String q = "SELECT * FROM users WHERE email='"+ email + "'and password='" + password + "'";
+        System.out.println(q);
+        ResultSet rs = st.executeQuery(q);
+
+
+        // 6. iterate the result set and print the values
+        while (rs.next()) {
+            System.out.print(rs.getString("full_name").trim());
+            System.out.print("---");
+            System.out.print(rs.getString("email").trim());
+            System.out.print("---");
+            System.out.print(rs.getString("password").trim());
+            System.out.println(" ");
+            return true;
+        }
+
+        // 7. close the objects
+        rs.close();
+        st.close();
+        conn.close();
+
+        return false;
+    }
+
+    private static void demoCreate() throws ClassNotFoundException, SQLException {
+
+        // 1. load driver
+        Class.forName("org.postgresql.Driver");
+
+        // 2. define connection params to db
+        final String URL = "jdbc:postgresql://54.93.65.5:5432/Agenda_Zoltan";
+        final String USERNAME = "fasttrackit_dev";
+        final String PASSWORD = "fasttrackit_dev";
+
+        // 3. obtain a connection
+        Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+
+        // 4. create a query statement
+        PreparedStatement pSt = conn.prepareStatement("INSERT INTO USERS (FULL_NAME, EMAIL, PASSWORD) VALUES (?,?,?)");
+        pSt.setString(1, "mihai");
+        pSt.setString(2, "mihai@gmail.com");
+        pSt.setString(3, "mihai123");
 
         // 5. execute a prepared statement
         int rowsInserted = pSt.executeUpdate();
@@ -68,7 +133,7 @@ public class DemoCRUDOperations {
         Class.forName("org.postgresql.Driver");
 
         // 2. define connection params to db
-        final String URL = "jdbc:postgresql://IP:5432/fast1";
+        final String URL = "jdbc:postgresql://54.93.65.5:5432/Agenda_Zoltan";
         final String USERNAME = "fasttrackit_dev";
         final String PASSWORD = "fasttrackit_dev";
 
@@ -79,13 +144,16 @@ public class DemoCRUDOperations {
         Statement st = conn.createStatement();
 
         // 5. execute a query
-        ResultSet rs = st.executeQuery("SELECT name,password FROM users");
+        ResultSet rs = st.executeQuery("SELECT full_name, email, password FROM users");
 
         // 6. iterate the result set and print the values
         while (rs.next()) {
-            System.out.print(rs.getString("name").trim());
+            System.out.print(rs.getString("full_name").trim());
             System.out.print("---");
-            System.out.println(rs.getString("password").trim());
+            System.out.print(rs.getString("email").trim());
+            System.out.print("---");
+            System.out.print(rs.getString("password").trim());
+            System.out.println(" ");
         }
 
         // 7. close the objects
@@ -100,7 +168,7 @@ public class DemoCRUDOperations {
         Class.forName("org.postgresql.Driver");
 
         // 2. define connection params to db
-        final String URL = "jdbc:postgresql://IP:5432/fast1";
+        final String URL = "jdbc:postgresql://54.93.65.5:5432/Agenda_Zoltan";
         final String USERNAME = "fasttrackit_dev";
         final String PASSWORD = "fasttrackit_dev";
 
@@ -108,10 +176,11 @@ public class DemoCRUDOperations {
         Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
 
         // 4. create a query statement
-        PreparedStatement pSt = conn.prepareStatement("UPDATE USERS SET NAME=?, PASSWORD=? WHERE PK_USER=?"); //so we have 3 params
-        pSt.setString(1, "ionelcondor");
-        pSt.setString(2, "password1");
-        pSt.setLong(3, 1);
+        PreparedStatement pSt = conn.prepareStatement("UPDATE USERS SET FULL_NAME=?,PASSWORD=? WHERE EMAIL=?"); //so we have 3 params
+        pSt.setString(1, "dani");
+        pSt.setString(2, "pass1");
+        pSt.setString(3, "password1");
+
 
         // 5. execute a prepared statement
         int rowsUpdated = pSt.executeUpdate();
@@ -128,7 +197,7 @@ public class DemoCRUDOperations {
         Class.forName("org.postgresql.Driver");
 
         // 2. define connection params to db
-        final String URL = "jdbc:postgresql://IP:5432/fast1";
+        final String URL = "jdbc:postgresql://54.93.65.5:5432/Agenda_Zoltan";
         final String USERNAME = "fasttrackit_dev";
         final String PASSWORD = "fasttrackit_dev";
 
@@ -136,8 +205,8 @@ public class DemoCRUDOperations {
         Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
 
         // 4. create a query statement
-        PreparedStatement pSt = conn.prepareStatement("DELETE FROM USERS WHERE PK_USER=?");
-        pSt.setLong(1, 1);
+        PreparedStatement pSt = conn.prepareStatement("DELETE FROM USERS WHERE FULL_NAME=?");
+        pSt.setString(1, "dani");
 
         // 5. execute a prepared statement
         int rowsDeleted = pSt.executeUpdate();
